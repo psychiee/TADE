@@ -2,7 +2,7 @@
 # BIAS, DARK, FLAT correction
 # requirtments: wbias.list, wdark*.list, wflat*.list, wobj*.list 
 # wskang
-# 20170704
+# 20201103
 
 import numpy as np 
 import time, os 
@@ -199,5 +199,4 @@ master_comp = np.mean(comp_stack, axis=0)
 print ('Save to comp1.fits ...', hdr.get('IMAGETYP'))
 hdr.set('DATE-PRC', time.strftime('%Y-%m-%dT%H:%M:%S'))
 hdr.set('OBJECT', 'comp1')
-fits.writeto('comp1.fits', master_comp, hdr, overwrite=True)         
-    
+fits.writeto('comp1.fits', master_comp, hdr, overwrite=True)
