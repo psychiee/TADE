@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 #from astropy.modeling import models, fitting 
 from glob import glob 
-from specutil import read_params, cr_reject
+from speclib import read_params, cr_reject
 
 par = read_params()
 os.chdir(par['WORKDIR'])

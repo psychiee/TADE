@@ -9,7 +9,7 @@ import time, os
 #from astropy.stats import sigma_clipped_stats
 from astropy.io import fits 
 from glob import glob 
-from specutil import read_params
+from speclib import read_params
 
 par = read_params()
 WORKDIR = par['WORKDIR']

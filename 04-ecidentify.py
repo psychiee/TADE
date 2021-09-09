@@ -9,10 +9,8 @@ import sys, os
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
-# from astropy.modeling import models, fitting
 from scipy.optimize import curve_fit
-# from numpy.polynomial.chebyshev import chebfit, chebval
-from specutil import read_params, cr_reject, find_emission, smooth
+from speclib import read_params, find_emission, smooth
 
 # =============================================================
 ECID_FILE = 'compFLI.ecid'
@@ -83,9 +81,7 @@ for j in range(0, spec.shape[0]):
         scx, scy = scx[ss[-NSTRONG:]], scy[ss[-NSTRONG:]]
         # FITTING the new spectrum with template spectrum
 
-
     # FIND the factors of SCALE, SHIFT
-
     def conv(x, *p):
         a, b = p
         ox = tx * a + b
@@ -94,7 +90,6 @@ for j in range(0, spec.shape[0]):
         oy = oy / np.max(oy)
         oy = smooth(oy, width=GPIX)
         return oy
-
 
     srow[srow < THRES] = 0
     srow2 = srow / np.max(srow)
@@ -130,8 +125,7 @@ for j in range(0, spec.shape[0]):
             a, b = np.polyfit(strong_tcx, strong_scx, 1)
             dx = strong_scx - (strong_tcx * a + b)
             sig = np.std(dx)
-            print('%2d %3d %5.1f %6.2f' % \
-                  (n, len(strong_tcx), max(dx) - min(dx), sig))
+            print(f'{n:2d} {len(strong_tcx):3d} {max(dx)-min(dx):5.1f} {sig:6.2f}')
             cond = abs(dx) < sig
             strong_tcx, strong_scx = strong_tcx[cond], strong_scx[cond]
             if len(strong_tcx) < 20: break
@@ -144,18 +138,9 @@ for j in range(0, spec.shape[0]):
     print('SCALE SHIFT   sig')
     print('%5.3f %5.1f %5.3f' % (SCALE, SHIFT, XSIG))
 
-    '''
-    fig, ax = plt.subplots(num=2, figsize=(7,7))
-    ax.plot(fex, fsx, 'r+')
-    ax.plot(fex, fex*a+b, 'k--', alpha=0.7, lw=2)
-    ax.grid()
-    fig.savefig(FID+'-FIT%02d.png' % (sord,))
-    fig.clf()
-    '''
-
     # PLOT the matching result of spectrum
     if SPEC_PLOT:
-        fig, ax = plt.subplots(num=99, figsize=(25, 10))
+        fig, ax = plt.subplots(num=99, figsize=(15, 6))
         ax.plot(tx * a + b, trow, 'g-', lw=4, alpha=0.5, label='TEMPLATE')
         ax.plot(sx, srow, 'b-', lw=1, label=FID)
         ax.plot(tcx * a + b, np.zeros_like(tcx) - 9000, 'g|', mew=7, ms=20, alpha=0.5)
@@ -164,8 +149,8 @@ for j in range(0, spec.shape[0]):
         ax.set_ylabel('Relative intensity')
         ax.set_ylim(-15000, 200000)
         ax.set_xlim(min(sx), max(sx))
-        ax.set_title('''AP%02d ORD%02d Transform Result of ThAr
-(SCALE=%.4f, SHIFT=%.2f, SIG=%.3f)''' % (j + 1, sord, SCALE, SHIFT, XSIG))
+        ax.set_title(f'''AP{j+1:02d} ORD{sord:02d} Transform Result of ThAr
+(SCALE={SCALE:.4f}, SHIFT={SHIFT:.2f}, SIG={XSIG:.3f})''')
         ax.grid()
         ax.legend()
         fig.savefig(FID + '-CORR%02d.png' % (j + 1,))

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 #from scipy.signal import find_peaks_cwt
 from numpy.polynomial.chebyshev import chebfit, chebval
 from astropy.io import fits
-from specutil import read_params, cr_reject, find_emission
+from speclib import read_params, cr_reject, find_emission
 
 par = read_params()
 os.chdir(par['WORKDIR'])

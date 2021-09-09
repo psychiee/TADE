@@ -10,14 +10,13 @@ from glob import glob
 import numpy as np 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-#from numpy.polynomial.chebyshev import chebfit, chebval
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
 from astropy.modeling import models, fitting 
 import astropy.constants as Const
-from specutil import x_helio, read_params, cr_reject, readmultispec, speccomb, speccont, speccrop
-GREEKS = ['alf', 'bet', 'gam', 'del', 'eps', 'zet', 'eta', 'tet', \
-          'iot', 'kap', 'lam', 'mu.', 'nu.', 'ksi', 'omi', 'pi.', \
+from speclib import x_helio, read_params, speccomb, speccrop
+GREEKS = ['alf', 'bet', 'gam', 'del', 'eps', 'zet', 'eta', 'tet',
+          'iot', 'kap', 'lam', 'mu.', 'nu.', 'ksi', 'omi', 'pi.',
           'rho', 'sig', 'tau', 'ups', 'phi', 'khi', 'psi', 'ome']
 
 par = read_params()
@@ -44,13 +43,6 @@ else:
         tmp = f.split('.')
         SPECLIST.append('w'+tmp[0]+'.ec.fits')
 
-#SPECLIST = glob('wBetel*.ec.fits')
-
-#temp = readmultispec('cftest.ec.fits')
-#twv = temp['wavelen']
-#tspec = temp['flux']
-#twv1, tspec1 = speccomb(twv, tspec)  
-    
 #=============================================================
 # READ the wavelength data from ecidentify 
 dat = np.genfromtxt(ECID_FILE)
@@ -83,15 +75,15 @@ ax3.plot(mlam, dlam, 'go', alpha=0.2)
 N, NMAX = 0, 15    
 while(N < NMAX):
     N = N + 1
-    davg, dsig = np.median(dlam), np.std(dlam)
-    vv, = np.where((dlam < davg+dsig*3) & (dlam > davg-dsig*3))
+    dmed, dsig = np.median(dlam), np.std(dlam)
+    vv, = np.where((dlam < dmed+dsig*3) & (dlam > dmed-dsig*3))
     if len(vv) == len(dlam): break
     if len(vv) < 150: break
     mpix, mord, mlam = mpix[vv], mord[vv], mlam[vv]
     p = f(p_init, mpix, mord, mlam)
     dlam = mlam - p(mpix, mord)
-    
-ax1.plot(mpix, dlam, 'r+', ms=8, label='%.5f$\pm$%.5f' % (davg, dsig))
+davg, dsig = np.mean(dlam), np.std(dlam)
+ax1.plot(mpix, dlam, 'r+', ms=8, label=f'{davg:.5f}$\pm${dsig:.5f}')
 ax2.plot(mord, dlam, 'b+', ms=8)
 ax3.plot(mlam, dlam, 'g+', ms=8)
 ax1.legend()
@@ -130,7 +122,7 @@ for INPUT_SPEC in SPECLIST:
     try: 
         c = SkyCoord.from_name(_OBJECT)
         RA, DEC = c.ra.value, c.dec.value
-        HV = x_helio(RA, DEC, jd=JD)
+        HV = x_helio(RA, DEC, jd=JD)[0]
         print ('RA, Dec= %.2f, %.2f' % (RA, DEC))
         print ('HV= %.5f' % (HV,))
     except:
@@ -141,12 +133,7 @@ for INPUT_SPEC in SPECLIST:
     OUTPUT = OBJECT+'-'+DATEOBS+'-'+EXPTIME
     
     # APPLY the wavelength solution into the pixel 
-    '''
-    for j in range(NAP):
-        c = apcoeffs[j]
-        xwv[j,:] = chebval(xpix, c)*(1.0 - HV/Const.c.value*1000.0)
-    '''
-    xpix, xord = [], [] 
+    xpix, xord = [], []
     for j in range(NAP):
         vv, = np.where(eap == eapset[j])
         xpix.append(np.arange(xspec.shape[1])+1)
@@ -191,8 +178,7 @@ for INPUT_SPEC in SPECLIST:
         axs[i].set_xlim(x_start, x_end)
         axs[i].grid()
         axs[i].set_ylim(y1, y2)
-    fig.suptitle('1D Full Spectrum\n%s\n (JD=%.6f, HV=%.4f)' % (OUTPUT,JD,HV), \
-                 fontsize=25)
+    fig.suptitle(f'1D Full Spectrum\n{OUTPUT:s}\n (JD={JD:.6f}, HV={HV:.4f})', fontsize=25)
     fig.savefig(OUTPUT+'-1d.pdf')
     fig.clf()
     
@@ -205,8 +191,7 @@ for INPUT_SPEC in SPECLIST:
             ax.plot(x, y, 'b-')
             yfit = xspec1[(xwv1 >= min(x)) & (xwv1 <= max(x))]
             ax.plot(x, y/yfit, 'r-', lw=3, alpha=0.5)
-            ax.set_title('Aperture RAW - AP%02d \n %s (JD=%.6f, HV=%.4f)' % \
-                         (ap[0],OUTPUT,JD,HV))
+            ax.set_title(f'Aperture RAW - AP{ap[0]:02.0f}\n{OUTPUT} (JD={JD:.6f}, HV={HV:.4f})')
             ax.grid()
             ax.set_ylim(y1-(y2-y1)*0.1, y2+(y2-y1)*0.1)
             pdf.savefig(fig)
