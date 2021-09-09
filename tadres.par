@@ -1,4 +1,4 @@
-WORKDIR  ./20201028   # path of data files
+WORKDIR  ./20201023   # path of data files
 NAP      24           # number of aperture for tracing and extracting  
 APTSTART 140          # aperture start point of y-axis in pixel (400/275/170)
 APTTHRES 100          # aperture feature finding threshold  (100)
@@ -8,9 +8,8 @@ APTDH    6            # detection for aperture detection (order axis) [pixel]
 APTPLOT  1            # flag for plotting fitting result
 APTORDER 3            # polynomial fitting order for aperture tracing 
 APTFILE  aptrace.dat  # data file of aperture tracing results
-CRREJECT 10           # sigma for CR rejecting on aperture extracting [pixel]
-APEXWID1 4            # extraction inner-width for aperture extracting [pixel]
-APEXWID2 2            # extraction outer-width for aperture extracting [pixel]
+CRREJECT 20           # sigma for CR rejecting on aperture extracting [pixel]
+APEXWID  4,4          # extraction INNER and OUTER width for aperture extracting [pixel]
 APEXPLOT 1            # flag for plotting aperture extracting result
 EIDFILE  ecreid2.dat  # data file of wavelength calibration results
 EIDPLOT  1            # flag for plotting spectrum of each order 

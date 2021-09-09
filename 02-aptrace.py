@@ -18,7 +18,6 @@ os.chdir(par['WORKDIR'])
 NAP = int(par['NAP'])
 STARTY = int(par['APTSTART'])
 THRES = float(par['APTTHRES'])
-#RANGE = np.array(par['APTRANGE'].split(','), int)
 # CUTTING parameters
 dW, dH = int(par['APTDW']), int(par['APTDH'])
 FIT_PLOT = bool(par['APTPLOT'])
@@ -31,19 +30,17 @@ if len(sys.argv) > 1:
 else:
     fname = 'iflat.fits'
 
-print ('NAP = ', NAP)
-print ('STARTY = ', STARTY)
-print ('THRES = ', THRES)
-print ('dW, dH = ', dW, dH)
-print ('PLOT = ', FIT_PLOT)
-print ('FILE = ', fname )
+print(f'{NAP = }')
+print(f'{STARTY = }')
+print(f'{THRES = }')
+print(f'{dW, dH = }')
+print(f'{FIT_PLOT = }')
+print(f'{FNAME = }')
 
 # OPEN the flat spectrum image 
 hdu = fits.open(fname)[0]
 fidx = os.path.splitext(fname)[0]
 dat = hdu.data
-# TRIM the data image 
-#dat = dat[RANGE[0]:RANGE[1],:]
 # SET the shape and mid-point
 H, W = dat.shape
 halfW = int(W/2) 
@@ -56,20 +53,21 @@ fcols = cr_reject(cols)#, nsigma=7, npix=5)
 cys0, cpeaks0 = find_emission(ys, fcols, thres=THRES, width=dH)
 #cys0 = find_peaks_cwt(fcols, np.arange(2,dH+1))
 #cpeaks0 = fcols[cys0]
+
 # CHECK the found peaks
 NPEAKS = len(cys0)
 cys, cpeaks = [], []
 for k in range(NPEAKS):
     # CHECK start Y-pixel position 
     if cys0[k] < STARTY: 
-        print ('CUTOFF: %i, %i' % (cys0[k], cpeaks0[k]))
+        print('CUTOFF: %i, %i' % (cys0[k], cpeaks0[k]))
         continue 
     # CHECK peak values w.r.t. nearby peaks
     if cpeaks0[k] < (cpeaks0[k-1]+cpeaks0[-(NPEAKS-k-1)])/10.0:
-        print ('SIDE-CHCEK: %i, %i, %i, %i' % \
+        print('SIDE-CHCEK: %i, %i, %i, %i' % \
                (cys0[k], cpeaks0[k], cpeaks0[k-1], cpeaks0[-(NPEAKS-k-1)]))
         continue
-    #print ('%i, %i' % (cys0[k], cpeaks0[k]))
+    #print('%i, %i' % (cys0[k], cpeaks0[k]))
     cys.append(cys0[k])
     cpeaks.append(cpeaks0[k])
 cys, cpeaks = np.array(cys), np.array(cpeaks)
@@ -90,7 +88,6 @@ if FIT_PLOT:
     ax.plot(cys-dH/2, cpeaks, 'r|', ms=15)
     ax.plot(cys+dH/2, cpeaks, 'r|', ms=15)
     ax.set_title('APFIND in the middle plane')
-    #plt.show()
     fig.savefig('APFIND')
     plt.close('all')
 
@@ -118,7 +115,7 @@ for j in range(NAP)[:]:
     for k in [-1, 1]:
         nerr = 0
         # start point in mid-frame
-        y, peak = cys[j], cpeaks[j]  
+        y, _ = cys[j], cpeaks[j]
         for i in range(halfW, int(W*(1-k)/2)+k*dW, -k*2*dW):
             # PRE-FITTING with current points
             if len(yc) > 6:
@@ -133,7 +130,7 @@ for j in range(NAP)[:]:
             # if NO emission, SKIP or BREAK
             if len(y_tmp) == 0: 
                 nerr += 1
-                print ('AP%02d X=%i NO PEAKs' % (cap[j], i))
+                print('AP%02d X=%i NO PEAKs' % (cap[j], i))
                 if nerr > 5: break
                 continue
            
@@ -144,7 +141,7 @@ for j in range(NAP)[:]:
             # if WEAK emission, SKIP or BREAK
             if peak_tmp < THRES: 
                 nerr += 1
-                print '%i %i %i WEAK' % (j, i, peak_tmp)
+                print('%i %i %i WEAK' % (j, i, peak_tmp))
                 if nerr > 5: break
                 continue
             '''
@@ -175,7 +172,7 @@ for j in range(NAP)[:]:
         yfit = chebval(xc, coeffs)
         rms = np.std(yc - yfit)
         asub.plot(xc, yc, 'k+', mew=1, ms=10)
-        asub.plot(xc, yfit, 'r-', lw=3, alpha=0.5, label='RMS = %.5f' % (rms,))
+        asub.plot(xc, yfit, 'r-', lw=3, alpha=0.5, label=f'RMS = {rms:.5f}')
         asub.set_xlabel('X [pixel]')
         asub.set_ylabel('Y [pixel]')
         asub.set_title('AP%02i Trace FIT' % (cap[j],))

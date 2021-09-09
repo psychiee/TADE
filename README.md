@@ -43,8 +43,7 @@ APTPLOT  1            # flag for plotting fitting result
 APTORDER 3            # polynomial fitting order for aperture tracing 
 APTFILE  aptrace.dat  # data file of aperture tracing results
 CRREJECT 10           # sigma for CR rejecting on aperture extracting [pixel]
-APEXWID1 4            # extraction inner-width for aperture extracting [pixel]
-APEXWID2 2            # extraction outer-width for aperture extracting [pixel]
+APEXWID  4,2          # extraction inner-width for aperture extracting [pixel]
 APEXPLOT 1            # flag for plotting aperture extracting result
 EIDFILE  ecreid2.dat  # data file of wavelength calibration results
 EIDPLOT  1            # flag for plotting spectrum of each order 
@@ -53,7 +52,7 @@ EIDGPIX  9            # width in pixel for emission detecting (>9)
 EIDSTART 52           # starting order of comparison spectrum
 EIDSCALE 0.6          # scaling factor w.r.t the template(FLI,26) (1.3/1.0/0.6)
 EIDSHIFT -20          # shift factor w.r.t the template(FLI,26) (-260/-60/-20)
-EIDORDER 7,7          # lambda-pixel; chebyshev polynomial fitting order 
+EIDORDER 7,7          # lambda-pixel chebyshev polynomial fitting order 
 CONORDER 3            # polynomial fitting order for continuum fitting 
 CONUPREJ 4.0          # upper factor for sigma clipping of continuum determination
 CONLOREJ 1.0          # lower factor for sigma clipping of continuum determination
@@ -62,5 +61,28 @@ CONLOREJ 1.0          # lower factor for sigma clipping of continuum determinati
 ### Run TARES codes
 
  - run 01-run_specproc.py 
-   - 
-
+   - do preprocessing of the object images by bias, dark correction
+   - generate the master flat image (iflat.fits)
+   - generate the master comparison image (comp1.fits)
+ - run 02-aptrace.py
+   - do aperture tracing using the master flat image (iflat.fits)
+   - generate the data file of aperture tracing result
+   - generate the pdf and png files from the aperture tracing process
+   - !!YOU SHOULD CHECK the result pdf and png files!!
+   - ADJUST the parameters for aperture tracing (APTSTART, APTTHRES, APTRANGE, ... APTFILE)
+ - run 03-apextract.py
+   - do aperture extraction using APTFILE data
+   - generate the spectrum file (*.ec.fits) by extraction for each image 
+   - generate the png files showing aperture extraction results
+   - !!YOU SHOULD CHECK the png files!!
+   - ADJUST the parameters for aperture extraction (CRREJECT, APEXWID, ... )
+ - run 04-ecidentify.py 
+   - do wavelength calibration using the master comparison spectrum (comp1.ec.fits) and template (compFLI.ec.fits)
+   - generate the data file of wavelength calibration results (EIDFILE)
+   - !!YOU SHOULD CHECK the png files of results!!
+   - ADJUST the paramters (EIDTHRES, ... EIDORDER)
+ - run 05-dispcor.py
+   - apply the heliocentric velocity correction to the spectrum (by object name in FITS header)
+   - generate the lpx data files of object spectra (wavelength, aperture numer, intensity)
+   - generate the pdf image files of object spectra (graph)
+   

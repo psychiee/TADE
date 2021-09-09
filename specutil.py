@@ -12,11 +12,14 @@ from astropy.io import fits
 from numpy.polynomial.chebyshev import chebfit, chebval
 
 def read_params():
-    f = open('pyspw.par','r')
+    f = open('tadres.par', 'r')
     par = {}
     for line in f:
-        tmp = line.split()
-        par.update({tmp[0]:tmp[1]})
+        tmps = line.split('#')[0].split()
+        if len(tmps) < 1: continue
+        keyword = tmps[0]
+        contents = ''.join(tmps[1:])
+        par.update({keyword: contents})
     return par
 
 def speccont(y, order=3, sig=[5,1], niter=25):

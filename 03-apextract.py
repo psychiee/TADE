@@ -7,7 +7,7 @@ Created on Tue Feb  6 16:50:46 2018
 """
 import sys, os, time
 import numpy as np 
-from numpy.polynomial.chebyshev import chebfit, chebval
+from numpy.polynomial.chebyshev import chebval
 import matplotlib.pyplot as plt 
 from astropy.io import fits
 #from astropy.modeling import models, fitting 
@@ -19,9 +19,7 @@ os.chdir(par['WORKDIR'])
 
 CR_REJECT = int(par['CRREJECT'])
 AP_PLOT = bool(int(par['APEXPLOT']))
-#RANGE = np.array(par['APTRANGE'].split(','), int) 
-AP_WID1 = int(par['APEXWID1']) # inner-width of aperture 
-AP_WID2 = int(par['APEXWID2']) # outer-width of aperture 
+AP_WID1, AP_WID2 = np.array(par['APEXWID'].split(','), int) # inner, outer width of aperture
 APT_FILE = par['APTFILE'] #'aptrace.dat'
 
 #print sys.argv
@@ -36,9 +34,7 @@ if len(sys.argv) > 3:
     else:
         FLIST += glob(sys.argv[3])
 else:
-    if os.path.exists('iflat.fits') & \
-       os.path.exists('comp1.fits') & \
-       os.path.exists('obj.list'): 
+    if os.path.exists('iflat.fits') & os.path.exists('comp1.fits') & os.path.exists('obj.list'):
         FLIST = ['iflat.fits','comp1.fits']
         for f in np.genfromtxt('obj.list', dtype='U').flatten():
             FLIST.append('w'+f)
@@ -48,14 +44,14 @@ else:
 *** [OBJECT LIST] = "@ap.list" or "wobj*.fits" or "test.fits"
 *** IF NO FLAT & COMP, python 03-apextract.py none none [OBJECT LIST] ...''')
 
-print ('CR_REJRECT=%i' %(CR_REJECT,))
-print ('AP_PLOT=%i' %(AP_PLOT,))
-print ('AP_WID= %i, %i' % (AP_WID1, AP_WID2))
-print ('APT_FILE=%s' %(APT_FILE,))
+print(f'{CR_REJECT = }')
+print(f'{AP_PLOT = }')
+print(f'AP_WID = {AP_WID1}, {AP_WID2}')
+print(f'{APT_FILE = }')
 
 # READ aptrace information 
 dat = np.genfromtxt(APT_FILE)
-aps = dat[:,0] # dat[RANGE[0]:RANGE[1],0]
+aps = dat[:,0]
 coeffs = dat[:,1:]
 NAP = len(aps)
 
@@ -65,19 +61,18 @@ for k, FNAME in enumerate(FLIST):
     FID = os.path.splitext(FNAME)[0]
     # if ec file EXISTS, SKIP
     if os.path.exists(FID+'.ec.fits'): 
-        print ('(%i)%s.ec.fits exists ... SKIP' % (k, FID))
+        print(f'({k}){FID}.ec.fits exists ... SKIP')
         # if it is FLAT, SAVE flat spectrum 
         if k == 0: 
             FLATSPEC = fits.open(FID+'.ec.fits')[0].data
         continue
     # CHECK the input file     
     if not os.path.exists(FNAME): 
-        print ('(%1)%s does not exist ... SKIP' % (k, FNAME))
+        print(f'({k}){FNAME} does not exist ... SKIP')
         continue 
     
     hdu = fits.open(FNAME)[0]
     img, hdr = hdu.data, hdu.header
-    #img = img[RANGE[0]:RANGE[1],:]
 
     # INPUT header 
     hdr.set('DISPAXIS', 1)
@@ -98,7 +93,7 @@ for k, FNAME in enumerate(FLIST):
     OBJECT = hdr.get('OBJECT')
     H, W = img.shape 
     xp = np.arange(W) 
-    print ('(%i)IMAGE: %s, DATA(%i, %i) %s' % (k,FNAME, H, W, OBJECT) )
+    print(f'({k})IMAGE: {FNAME}, DATA({H}, {W}) {OBJECT}')
     ecs = []
     for j in range(NAP):
         apnum = aps[j]
@@ -112,7 +107,8 @@ for k, FNAME in enumerate(FLIST):
             row2 = img[(yint-AP_WID1+1):(yint+AP_WID2+1),i]
             total_row = row1*(1-yflt) + row2*yflt
             aprow.append(np.sum(total_row))
-            
+
+        aprow = np.array(aprow)
         # COSMIC RAY Rejection 
         # NSIGMA value = 0; no correction
         if CR_REJECT > 0: 
@@ -129,8 +125,7 @@ for k, FNAME in enumerate(FLIST):
         
         yp0 = chebval(H/2, c)
         yp1, yp2 = yp0-AP_WID1, yp0+AP_WID2
-        hdr.set('APNUM%i' % (apnum,), \
-          '%i %i %.1f %.1f' % (apnum, apnum, yp1, yp2))
+        hdr.set(f'APNUM{apnum:02.0f}', f'{apnum} {apnum} {yp1:.1f} {yp2:.1f}')
 
         if (k < 2) | AP_PLOT:
             fig, ax = plt.subplots(num=99, figsize=(15,6))
