@@ -1,5 +1,5 @@
-# TADRES
-## Tool for Automatic Data Reduction of Echelle Spectra
+# TADE
+## Tool for Automatic Data reduction of Echelle spectra
 
 Perform the data redcution of echelle spectra. (preferred for the eShel data obtained at Deokheung Optical Astronomy Observatory)
  - for the data of Shelyak eShel spectrograph, https://www.shelyak.com/description-eshel/?lang=en
@@ -11,7 +11,7 @@ The Goal of Project
 
 ## Components
  - specutils.py (functions for data reduction of echelle spectra)
- - tares.par (parameters of echelle spectrum image  
+ - tade.par (parameters of echelle spectrum image  
  - 01-run_specproc.py (run the automatic image preprocessing)
  - 02-aptrace.py (run the aperture tracing of echelle spectra)
  - 03-apextract.py (extract the apertures in the echelle spectrum image) 
@@ -30,7 +30,7 @@ The Goal of Project
  - comp-????-??s.fit (ThAr lamp spectrum images)
  - XXXX-????-????s.fit (object spectrum images: XXXX should be the object name)
 
-### Input the parameters in tape.par 
+### Input the parameters in tade.par 
 ```    
 WORKDIR  ./20201028   # path of data files
 NAP      24           # number of aperture for tracing and extracting  
