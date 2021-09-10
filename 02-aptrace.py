@@ -35,7 +35,7 @@ print(f'{STARTY = }')
 print(f'{THRES = }')
 print(f'{dW, dH = }')
 print(f'{FIT_PLOT = }')
-print(f'{FNAME = }')
+print(f'FILE = {fname}')
 
 # OPEN the flat spectrum image 
 hdu = fits.open(fname)[0]

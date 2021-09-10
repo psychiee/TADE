@@ -138,33 +138,34 @@ def cr_reject(flux, nsigma=15.0, npix=3, verbose=False):
     return np.array(flux)
     
 def find_emission(fx, fy, thres=200, width=9):
-    """
-    find the emission features in the spectrum
-    ref: https://specutils.readthedocs.io/en/stable/_modules/specutils/fitting/fitmodels.html#find_lines_derivative
-    """
-    kernal = [1, 0, -1]
-    # calc. the derivative using kernal
-    dY = convolve(fy, kernal, 'valid')
-    # check the sign of derivatives
-    S = np.sign(dY)
-    # find the sign flipping point
-    ddS = convolve(S, kernal, 'valid')
+    sawtooth = np.array([0,-1,-2,-1,0,1,2,1,0])
+    w0 = len(sawtooth)
+    npix = len(fy)
 
-    # the point which changes from positive to negative
-    candidates = np.where(dY > 0)[0] + (len(kernal) - 1)
-    line_inds = sorted(set(candidates).intersection(np.where(ddS == -2)[0] + 1))
+    if npix < width:
+        return [], []
 
-    # find the peaks over threshold
-    line_inds = np.array(line_inds)[fy[line_inds] > thres]
-
-    # find the consecutive groups of peak points
-    line_inds_grouped = np.split(line_inds, np.where(np.diff(line_inds) != 1)[0] + 1)
-
-    if len(line_inds_grouped[0]) > 0:
-        emission_inds = [inds[np.argmax(fy[inds])] for inds in line_inds_grouped]
+    if (width % 2) == 0:
+        width += 1
+    if w0 >= width:
+        width = w0
     else:
-        emission_inds = []
-    return fx[emission_inds], fy[emission_inds]
+        d0 = np.arange(w0)/w0
+        dp = np.arange(width)/width
+        sawtooth = np.interp(dp, d0, sawtooth)
+    # READ the middle column/row in the image
+    sfy = np.r_[fy[(width-1):0:-1],fy,fy[-2:(-width-1):-1]]
+    pcov = np.convolve(sawtooth, sfy, 'valid')[int(width/2):-int(width/2)]
+    cx, cy = [], []
+    for i in range(1, npix-1):
+        p1, p2 = pcov[i-1], pcov[i]
+        py = fy[i-1] + (fy[i]-fy[i-1])*(p1)/(p1-p2)
+        px = fx[i-1] + (fx[i]-fx[i-1])*(p1)/(p1-p2)
+        if (p1 < 0) & (p2 > 0) & (py > thres):
+            cx.append(px)
+            cy.append(py)
+    return np.array(cx), np.array(cy)
+
 
 def find_absorption(fx, fy, thres=0.5, width=13):
     sawtooth = np.array([0,-1,-2,-1,0,1,2,1,0])
@@ -210,35 +211,6 @@ def smooth(x, width=11, window='hanning'):
     y = np.convolve(w/w.sum(),s,mode='valid')
     return y[int(width/2):-int(width/2)] 
 
-def find_emission0(fx, fy, thres=200, width=9):
-    sawtooth = np.array([0,-1,-2,-1,0,1,2,1,0])
-    w0 = len(sawtooth)
-    npix = len(fy)
-
-    if npix < width:
-        return [], []
-
-    if (width % 2) == 0:
-        width += 1
-    if w0 >= width:
-        width = w0
-    else:
-        d0 = np.arange(w0)/w0
-        dp = np.arange(width)/width
-        sawtooth = np.interp(dp, d0, sawtooth)
-    # READ the middle column/row in the image
-    sfy = np.r_[fy[(width-1):0:-1],fy,fy[-2:(-width-1):-1]]
-    pcov = np.convolve(sawtooth, sfy, 'valid')[int(width/2):-int(width/2)]
-    cx, cy = [], []
-    for i in range(1, npix-1):
-        p1, p2 = pcov[i-1], pcov[i]
-        py = fy[i-1] + (fy[i]-fy[i-1])*(p1)/(p1-p2)
-        px = fx[i-1] + (fx[i]-fx[i-1])*(p1)/(p1-p2)
-        if (p1 < 0) & (p2 > 0) & (py > thres):
-            cx.append(px)
-            cy.append(py)
-    return np.array(cx), np.array(cy)
-
 def find_absorption0(x, y, width=5, thres=0.99, name='test'):
     # CHECK if width is odd
     if (width % 2) == 0: 
@@ -268,7 +240,35 @@ def find_absorption0(x, y, width=5, thres=0.99, name='test'):
 
     return xcs[vv], ycs[vv]
 
- 
+def find_emission0(fx, fy, thres=200, width=9):
+    """
+    find the emission features in the spectrum
+    ref: https://specutils.readthedocs.io/en/stable/_modules/specutils/fitting/fitmodels.html#find_lines_derivative
+    """
+    kernal = [1, 0, -1]
+    # calc. the derivative using kernal
+    dY = convolve(fy, kernal, 'valid')
+    # check the sign of derivatives
+    S = np.sign(dY)
+    # find the sign flipping point
+    ddS = convolve(S, kernal, 'valid')
+
+    # the point which changes from positive to negative
+    candidates = np.where(dY > 0)[0] + (len(kernal) - 1)
+    line_inds = sorted(set(candidates).intersection(np.where(ddS == -2)[0] + 1))
+
+    # find the peaks over threshold
+    line_inds = np.array(line_inds)[fy[line_inds] > thres]
+
+    # find the consecutive groups of peak points
+    line_inds_grouped = np.split(line_inds, np.where(np.diff(line_inds) != 1)[0] + 1)
+
+    if len(line_inds_grouped[0]) > 0:
+        emission_inds = [inds[np.argmax(fy[inds])] for inds in line_inds_grouped]
+    else:
+        emission_inds = []
+    return fx[emission_inds], fy[emission_inds]
+
 
 #############################################################
 #  READ IRAF spectrum FITS file
