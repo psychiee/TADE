@@ -10,7 +10,7 @@ The Goal of Project
  - Explain the data reduction process of echelle spectra for educational purpose.
 
 ## Components
- - specutils.py (functions for data reduction of echelle spectra)
+ - speclib.py (functions for data reduction of echelle spectra)
  - tade.par (parameters of echelle spectrum image  
  - 01-run_specproc.py (run the automatic image preprocessing)
  - 02-aptrace.py (run the aperture tracing of echelle spectra)
@@ -78,11 +78,14 @@ CONLOREJ 1.0          # lower factor for sigma clipping of continuum determinati
    - ADJUST the parameters for aperture extraction (CRREJECT, APEXWID, ... )
  - run 04-ecidentify.py 
    - do wavelength calibration using the master comparison spectrum (comp1.ec.fits) and template (compFLI.ec.fits)
-   - generate the data file of wavelength calibration results (EIDFILE)
+   - generate the data file of line-matching results b.t.w. master comparison and template (EIDFILE)
    - !!YOU SHOULD CHECK the png files of results!!
    - ADJUST the paramters (EIDTHRES, ... EIDORDER)
  - run 05-dispcor.py
    - apply the heliocentric velocity correction to the spectrum (by object name in FITS header)
+   - calculate the wavelength solution for all apertures by polynomial fitting using EIDFILE line data
+   - determine the local continuum in each aperture, and normalize it
+   - place the spectra end to end for all apertures
    - generate the lpx data files of object spectra (wavelength, aperture numer, intensity)
    - generate the pdf image files of object spectra (graph)
    
