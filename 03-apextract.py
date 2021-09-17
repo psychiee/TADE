@@ -23,10 +23,9 @@ AP_WID1, AP_WID2 = np.array(par['APEXWID'].split(','), int) # inner, outer width
 APT_FILE = par['APTFILE'] #'aptrace.dat'
 
 #print sys.argv
-
+FLIST = []
 if len(sys.argv) > 3:
-    FLIST = []
-    # FLAT / COMP files 
+    # FLAT / COMP files
     FLIST += sys.argv[1:3]
     # READ the list of files 
     if sys.argv[3].startswith('@'):
@@ -35,7 +34,7 @@ if len(sys.argv) > 3:
         FLIST += glob(sys.argv[3])
 else:
     if os.path.exists('iflat.fits') & os.path.exists('comp1.fits') & os.path.exists('obj.list'):
-        FLIST = ['iflat.fits','comp1.fits']
+        FLIST = FLIST + ['iflat.fits','comp1.fits']
         for f in np.genfromtxt('obj.list', dtype='U').flatten():
             FLIST.append('w'+f)
     else:
