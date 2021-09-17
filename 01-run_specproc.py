@@ -81,7 +81,7 @@ else:
         bias_stack.append(dat)
         print(f'{fname} {np.mean(dat):8.1f} {np.std(dat):8.1f} {np.max(dat):8.1f} {np.min(dat):8.1f} ')
     print('(Median) combine of bias frames ...' )
-    master_bias = np.median(bias_stack, axis=0) 
+    master_bias = np.array(np.median(bias_stack, axis=0), dtype=np.float32)
     dat = master_bias
     print(f'MASTER BIAS {np.mean(dat):8.1f} {np.std(dat):8.1f} {np.max(dat):8.1f} {np.min(dat):8.1f}')
     
@@ -111,7 +111,7 @@ for lname in list_files:
             dat, hdr = hdu.data, hdu.header
             dark_stack.append(dat - master_bias) 
             print(f'{fname} {np.mean(dat):8.1f} {np.std(dat):8.1f} {np.max(dat):8.1f} {np.min(dat):8.1f} ')
-        master_dark = np.median(dark_stack, axis=0)
+        master_dark = np.array(np.median(dark_stack, axis=0), dtype=np.float32)
         exptime_dark = hdr.get('EXPTIME')
         print('Save to '+fidx+'.fits ...', hdr.get('IMAGETYP'), hdr.get('EXPTIME'))
         hdr.set('OBJECT',fidx)
@@ -145,7 +145,7 @@ for fname in flist:
     dFRAME = dFRAME  * (cEXPTIME/dEXPTIME)
     cIMAGE = cIMAGE - master_bias - dFRAME
     # TRIM the images 
-    cIMAGE = cIMAGE[:,RANGE[0]:RANGE[1]]
+    cIMAGE = np.array(cIMAGE[:,RANGE[0]:RANGE[1]], dtype=np.float32)
 
     hdr.set('DATE-PRC', time.strftime('%Y-%m-%dT%H:%M:%S'))
     fits.writeto('w'+fname, cIMAGE, hdr, overwrite=True)
@@ -166,7 +166,7 @@ else:
         dat, hdr = hdu.data, hdu.header
         flat_stack.append(dat)
         print(f'{fname} {np.mean(dat):8.1f} {np.std(dat):8.1f} {np.max(dat):8.1f} {np.min(dat):8.1f} ')
-    master_flat = np.median(flat_stack, axis=0)
+    master_flat = np.array(np.median(flat_stack, axis=0), dtype=np.float32)
     print('Save to '+fidx+'.fits ...', hdr.get('IMAGETYP'))
     hdr.set('DATE-PRC', time.strftime('%Y-%m-%dT%H:%M:%S'))
     hdr.set('OBJECT', fidx)
@@ -183,7 +183,7 @@ for fname in comp_list:
     dat, hdr = hdu.data, hdu.header
     comp_stack.append(dat)
     print(f'{fname} {np.mean(dat):8.1f} {np.std(dat):8.1f} {np.max(dat):8.1f} {np.min(dat):8.1f} ')
-master_comp = np.mean(comp_stack, axis=0)
+master_comp = np.array(np.mean(comp_stack, axis=0), dtype=np.float32)
 print('Save to comp1.fits ...', hdr.get('IMAGETYP'))
 hdr.set('DATE-PRC', time.strftime('%Y-%m-%dT%H:%M:%S'))
 hdr.set('OBJECT', 'comp1')

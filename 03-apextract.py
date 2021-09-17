@@ -108,7 +108,7 @@ for k, FNAME in enumerate(FLIST):
             total_row = row1*(1-yflt) + row2*yflt
             aprow.append(np.sum(total_row))
 
-        aprow = np.array(aprow)
+        aprow = np.array(aprow, dtype=np.float32)
         # COSMIC RAY Rejection 
         # NSIGMA value = 0; no correction
         if CR_REJECT > 0: 
@@ -141,7 +141,7 @@ for k, FNAME in enumerate(FLIST):
             fig.savefig(FID+'-EXAP%02d.png' % (apnum,))
             fig.clf()
         
-    ecdat = np.array(ecs)
+    ecdat = np.array(ecs, dtype=np.float32)
     hdr.set('AP-WID', '%i, %i' % (AP_WID1,AP_WID2), comment='Aperture width in pixel')
     # (case)FLAT, SAVE the flat spectrum into flatspec
     if k == 0:
