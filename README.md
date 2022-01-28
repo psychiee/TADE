@@ -1,5 +1,5 @@
-# TADE
-## Tools for Automatic Data reduction of Echelle spectra
+# TADES
+## Tools for Automatic Data reduction of Echelle Spectra
 
 Perform the data redcution of echelle spectra. (preferred for the eShel data obtained at Deokheung Optical Astronomy Observatory)
  - for the data of Shelyak eShel spectrograph, https://www.shelyak.com/description-eshel/?lang=en
