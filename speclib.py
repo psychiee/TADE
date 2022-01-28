@@ -12,7 +12,7 @@ from astropy.io import fits
 from numpy.polynomial.chebyshev import chebfit, chebval
 
 def read_params():
-    f = open('tade.par', 'r')
+    f = open('tades.par', 'r')
     par = {}
     for line in f:
         tmps = line.split('#')[0].split()
