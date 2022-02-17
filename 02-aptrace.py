@@ -30,11 +30,11 @@ if len(sys.argv) > 1:
 else:
     fname = 'iflat.fits'
 
-print(f'{NAP = }')
-print(f'{STARTY = }')
-print(f'{THRES = }')
-print(f'{dW, dH = }')
-print(f'{FIT_PLOT = }')
+print(f'NAP = {NAP}')
+print(f'STARTY = {STARTY}')
+print(f'THRES = {THRES}')
+print(f'dW, dH = {dW}, {dH}')
+print(f'FIT PLOT = {FIT_PLOT}')
 print(f'FILE = {fname}')
 
 # OPEN the flat spectrum image 

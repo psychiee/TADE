@@ -43,10 +43,10 @@ else:
 *** [OBJECT LIST] = "@ap.list" or "wobj*.fits" or "test.fits"
 *** IF NO FLAT & COMP, python 03-apextract.py none none [OBJECT LIST] ...''')
 
-print(f'{CR_REJECT = }')
-print(f'{AP_PLOT = }')
+print(f'CR_REJECT = {CR_REJECT}')
+print(f'AP_PLOT = {AP_PLOT}')
 print(f'AP_WID = {AP_WID1}, {AP_WID2}')
-print(f'{APT_FILE = }')
+print(f'APT_FILE = {APT_FILE}')
 
 # READ aptrace information 
 dat = np.genfromtxt(APT_FILE)
